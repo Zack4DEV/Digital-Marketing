@@ -34,5 +34,5 @@ jobs:
               context: .
               file: ./Dockerfile
               push: true
-              tags: Zack4DEV/Digital-Marketing:latest
+              tags: Zack4DEV/digital-marketing:latest
               platforms: linux/amd64, linux/arm64

@@ -1,0 +1,148 @@
+/* assets/style.css */
+
+/* Tailwind CSS Directives (if you're using Tailwind) */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Styles */
+
+body {
+    @apply bg-gray-100 text-gray-800; /* Example Tailwind classes */
+}
+
+h1 {
+    @apply text-3xl font-bold mb-4; /* Example Tailwind classes */
+}
+
+p {
+    @apply mb-2; /* Example Tailwind classes */
+}
+
+.button {
+    @apply px-4 py-2 rounded-md font-semibold; /* Example Tailwind classes */
+}
+
+.button.primary {
+    @apply bg-blue-500 text-white hover:bg-blue-600; /* Example Tailwind classes */
+}
+
+.button.secondary {
+    @apply bg-gray-200 text-gray-700 hover:bg-gray-300; /* Example Tailwind classes */
+}
+
+.input, textarea {
+    @apply w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300; /* Example Tailwind classes */
+}
+
+.input.error, textarea.error {
+  @apply border-red-500;
+}
+
+.input.error:focus, textarea.error:focus {
+  @apply ring-red-300;
+}
+
+.code-block {
+    @apply bg-gray-100 p-4 rounded-md overflow-x-auto; /* Example Tailwind classes */
+}
+
+.nerdy-details {
+    @apply mt-4; /* Example Tailwind classes */
+}
+
+.spinner {
+    @apply text-blue-500; /* Example Tailwind classes */
+}
+
+/* Custom Streamlit adjustments (if needed) */
+
+.st-emotion-cache-1y4p8pa { /* Example to target Streamlit elements */
+    @apply mb-4; /* Example Tailwind classes */
+}
+
+/* Example Custom Classes (if you're not using Tailwind) */
+
+.custom-button {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+.custom-button:hover {
+    background-color: #3e8e41;
+}
+
+.centered {
+  text-align: center;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.form-submit {
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.form-submit:hover {
+  background-color: #45a049;
+}
+
+/* Add more custom styles as needed */
+
+/* Add specific styling for the streamlit_app.py */
+
+.bg-background {
+    background-color: #f9fafb; /* Light gray background */
+}
+
+.text-primary-foreground {
+    color: #111827; /* Dark gray text */
+}
+
+.text-muted-foreground {
+    color: #6b7280; /* Muted gray text */
+}
+
+.bg-input {
+    background-color: #ffffff; /* White input background */
+}
+
+.text-input {
+    color: #111827; /* Dark gray input text */
+}
+
+.placeholder-input {
+    color: #9ca3af; /* Light gray placeholder text */
+}
+
+.border-border {
+    border-color: #d1d5db; /* Light gray border */
+}
+
+.ring-ring {
+    --tw-ring-color: #3b82f6; /* Blue ring color */
+}
+
+/* Ensure consistent button styling */
+.button_base {
+    @apply px-6 py-3 rounded-lg hover:opacity-90 transition-colors;
+}

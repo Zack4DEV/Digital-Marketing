@@ -1,27 +1,9 @@
-from enum import Enum
-from typing import Callable, Union, Tuple
+import streamlit as st
+import json
+import requests
+from dotenv import load_dotenv
 import os
 from cryptography.fernet import Fernet
-from dotenv import load_dotenv
-
-from langchain_core.messages import SystemMessage
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.prompts.base import BasePromptTemplate
-from langchain_groq import ChatGroq
-from langchain_openai import ChatOpenAI
-from langchain_community.chat_models.perplexity import ChatPerplexity
-from langchain.callbacks.tracers import ConsoleCallbackHandler
-from langchain.prompts import HumanMessagePromptTemplate
-from langchain.schema import StrOutputParser
-
-
-
-MENDABLE_API_KEY = "MENDABLE_API_KEY"
-RESPELL_API_KEY = "RESPELL_API_KEY"
-OPENAI_API_KEY = "OPENAI_API_KEY"
-VERTEX_AI_GEMINI_API_KEY = "VERTEX_AI_GEMINI_API_KEY"
-VERTEX_AI_PALM2_API_KEY = "VERTEX_AI_PALM2_API_KEY"
-
 
 _SYSTEM_MESSAGE = (
     "You Are User Experience Virtual Assistant Agent Over Digital Marketing Platform .Your task is to guide and answer all users questions in order to improve UX, It has to be clear and concise. \n"
@@ -29,137 +11,158 @@ _SYSTEM_MESSAGE = (
     "Provide any kind of resources help ,suggestions and more navigation facilities over the platform"
 )
 
-_REWRITE_PROMPT: BasePromptTemplate = ChatPromptTemplate.from_messages(
-    [
-        SystemMessage(_SYSTEM_MESSAGE),
-        HumanMessagePromptTemplate.from_template("{text}"),
-    ]
-)
-
 class Encryption:
+    def __init__(self, key):
+        self.key = key
+        self.fernet = Fernet(self.key)
 
-    load_dotenv()
+    def encrypt_env(self, input_file=".env.development", output_file=".env.development.enc"):
+        """Encrypts the .env file."""
+        try:
+            with open(input_file, 'rb') as file:
+                original = file.read()
+            encrypted = self.fernet.encrypt(original)
 
-    key = b'MENDABLE_API_KEY'
+            with open(output_file, 'wb') as encrypted_file:
+                encrypted_file.write(encrypted)
+            st.success(f"Encrypted {input_file} to {output_file}")
+        except FileNotFoundError:
+            st.error(f"File {input_file} not found.")
+        except Exception as e:
+            st.error(f"Encryption failed: {e}")
 
-    def encrypt_key(
-        with open('.env.development' ,'rb') as file:
-            original = file.read()
-        encrypted = fernet.encrypt(original)
+    def decrypt_env(self, input_file=".env.development.enc", output_file=".env.development"):
+        """Decrypts the .env.enc file."""
+        try:
+            with open(input_file, 'rb') as file:
+                encrypted = file.read()
+            decrypted = self.fernet.decrypt(encrypted)
 
-        with open('.env.development.enc' ,'wb') as encrypted_file:
-            encrypted_file.write(encrypted)
-
-
-    )
-
-    def decrypt_key(
-        fernet = Fernet(b'(secrets.MENDABLE_API_KEY)')
-        
-        with open('.env.development.enc' ,'rb') as file:
-            encrypted = file.read()
-        decrypted = fernet.decrypt(encrypted)
-
-         with open('.env.development.enc' ,'wb') as decrypted_file:
-            decrypted_file.write(decrypted)
-        
-
-    )
-
-
-
-class Provider(Enum):
-    MENDABLE = "mendable"
-    RESPELL = "respell"
-    OPENAI = "openai"
-    GOOGLE = "google"
-
-class Model(Enum):
-
-    MENDABLE_LLM = "mendable-llm"
-    RESPELL_LLM = "respell-llm"
-    GPT4 = "gpt-4o"
-    GPT4_MINI = "gpt-4o-mini"
-    VERTEX_AI_GEMINI = "vertex-ai-gemini"
-    VERTEX_AI_PALM2 = "vertex-ai-palm-2"
-
-# OpenAI can be used as a provider with the following models: GPT3, GPT4.
-# GROQ can be used as a provider with the following models: MIXTRAL, GEMMA.
-def is_valid_provider_model_combination(provider: Provider, model: Model) -> bool:
-    if provider == Provider.MENDABLE:
-        return model in [Model.MENDABLE_LLM]
-    elif provider == Provider.RESPELL:
-        return model in [Model.RESPELL_LLM]
-    elif provider == Provider.OPENAI:
-        return model in [Model.GPT4, Model.GPT4_MINI]
-    elif provider == Provider.GOOGLE:
-        return model in [Model.VERTEX_AI_GEMINI, Model.VERTEX_AI_PALM2]
-
-def _create_mendable_chat(
-    model: Model,temperature: float
-) -> Callable[[Model, str, float], ChatMendable]:
-    api_key = os.getenv(b'MENDABLE_API_KEY')
-    return ChatMendable(model=model.value, mendable_api_key=api_key ,temperature=temperature)
-
-def _create_respell_chat(
-    model: Model,temperature: float
-) -> Callable[[Model, str, float], ChatRespell]:
-    api_key = os.getenv(b'RESPELL_API_KEY')
-    return ChatRespell(model=model.value, respell_api_key=api_key ,temperature=temperature)
-
-def _create_openai_chat(
-    model: Model, temperature: float
-) -> Callable[[Model, str, float], ChatOpenAI]:
-    api_key = os.getenv(b'OPENAI_API_KEY')
-    return ChatOpenAI(model=model.value, openai_api_key=api_key, temperature=temperature)
-
-
-def _create_google_chat(
-    model: Model, temperature: float
-) -> Callable[[Model, str, float], ChatGoogle]:
-    api_key = os.getenv(b'VERTEX_AI_GEMINI_API_KEY')
-    return ChatGoogle(
-        model_name=model.value, VERTEX_AI_GEMINI_API_KEY=api_key, temperature=temperature
-    )
-
-
-def get_chat(
-    provider: Provider, model: Model
-) -> Callable[[Model, str, float], Union[ChatOpenAI, ChatGoogle]]:
-    if not is_valid_provider_model_combination(provider, model):
-        raise ValueError("Invalid provider-model combination: {provider}-{model}")
-    if provider == Provider.MENDABLE:
-        return _create_mendable_chat
-    elif provider == Provider.RESPELL:
-        return _create_respell_chat
-    elif provider == Provider.OPENAI:
-        return _create_openai_chat
-    elif provider == Provider.GOOGLE:
-        return _create_google_chat
-
-
+            with open(output_file, 'wb') as decrypted_file:
+                decrypted_file.write(decrypted)
+            st.success(f"Decrypted {input_file} to {output_file}")
+        except FileNotFoundError:
+            st.error(f"File {input_file} not found.")
+        except Exception as e:
+            st.error(f"Decryption failed: {e}")
 
 class LLMClient:
-    def __init__(
-        self, provider: Provider, model: Model, temperature: float = 0.35
-    ) -> None:
-        self.chat = get_chat(provider, model)(model, temperature)
+    def __init__(self):
+        self.ai_config = self.load_ai_config()
+        if self.ai_config:
+            self.ai_platform = self.ai_config.get('ai_platform')
+            if self.ai_platform == 'mendable':
+                mendable_config = self.ai_config.get('mendable')
+                if mendable_config:
+                    self.workspace_id = mendable_config.get('workspace_id')
+                    self.data_source_id = mendable_config.get('data_source_id')
+                    self.model = mendable_config.get('model')
 
-    def rewrite(self, text: str) -> Tuple[str, int]:
-        output_parser = StrOutputParser()
-        chain = _REWRITE_PROMPT | self.chat
-        output = chain.invoke(
-            {"text": text},
-            config={"callbacks": [ConsoleCallbackHandler()]},
-        )
-        return (
-            output_parser.invoke(output),
-            # The response metadata suppose to contain the token usage information.
-            # However, it is not always the case. Consider token usage as 0 if
-            # it is not available.
-            (
-                0
-                if "token_usage" not in output.response_metadata
-                else output.response_metadata["token_usage"]["total_tokens"]
-            ),
-        )
+                    # Decrypt the .env file and load environment variables
+                    encryption_key = os.environ.get("ENCRYPTION_KEY") # Get encryption key from environment.
+                    if encryption_key:
+                        encryption_client = Encryption(encryption_key.encode())
+                        encryption_client.decrypt_env() # decrypt .env.development.enc to .env.development
+                        load_dotenv() # Load the decrypted env variables
+                        self.api_key = os.environ.get("MENDABLE_API_KEY") # Get API key from env.
+                    else:
+                        st.error("Encryption key not found in environment variables.")
+                        self.api_key = None
+                else:
+                    st.error("Mendable configuration missing.")
+                    self.api_key = None
+            elif self.ai_platform == 'other':
+                other_config = self.ai_config.get('other_ai')
+                if other_config:
+                    self.other_api_key = other_config.get('other_api_key')
+                    self.other_model = other_config.get('other_model')
+                else:
+                    st.error("Other AI configuration missing.")
+                    self.other_api_key = None
+            else:
+                st.error("Invalid ai_platform.")
+                self.api_key = None
+        else:
+            self.api_key = None
+
+    def load_ai_config(self):
+        """Loads AI configuration from assets/data.json."""
+        try:
+            with open('assets/data.json', 'r') as f:
+                config = json.load(f)
+            return config
+        except FileNotFoundError:
+            st.error("assets/data.json not found.")
+            return None
+        except json.JSONDecodeError:
+            st.error("Invalid JSON format in assets/data.json.")
+            return None
+
+    def query_mendable(self, query):
+        """Queries the Mendable AI API."""
+        if not self.api_key:
+            st.error("Mendable API key not configured.")
+            return None
+
+        url = "https://api.mendable.ai/v1/completions"
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "workspace_id": self.workspace_id,
+            "data_source_id": self.data_source_id,
+            "messages": [{"role": "user", "content": query}, {"role": "system", "content": _SYSTEM_MESSAGE}],
+            "model": self.model,
+        }
+
+        try:
+            response = requests.post(url, headers=headers, json=payload)
+            response.raise_for_status()
+            result = response.json()
+            answer = result.get('choices', [{}])[0].get('message', {}).get('content')
+            return answer
+        except requests.exceptions.RequestException as e:
+            st.error(f"Mendable API request failed: {e}")
+            return None
+        except (KeyError, IndexError) as e:
+            st.error(f"Error parsing Mendable API response: {e}")
+            return None
+
+    def query_other(self, query):
+        """Queries the 'other' AI API."""
+        if not self.other_api_key:
+            st.error("Other AI API key not configured.")
+            return None
+        url = "YOUR_OTHER_AI_API_ENDPOINT"
+        headers = {
+            "Authorization": f"Bearer {self.other_api_key}",
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "prompt": query,
+            "model": self.other_model
+        }
+
+        try:
+            response = requests.post(url, headers=headers, json=payload)
+            response.raise_for_status()
+            result = response.json()
+            answer = result.get("choices", [{}])[0].get("text")
+            return answer
+        except requests.exceptions.RequestException as e:
+            st.error(f"Other AI API request failed: {e}")
+            return None
+        except (KeyError, IndexError) as e:
+            st.error(f"Error parsing Other AI API response: {e}")
+            return None
+
+    def query(self, query):
+        """Queries the configured AI platform."""
+        if self.ai_platform == 'mendable':
+            return self.query_mendable(query)
+        elif self.ai_platform == 'other':
+            return self.query_other(query)
+        else:
+            st.error('Invalid ai platform.')
+            return None

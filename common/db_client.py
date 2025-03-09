@@ -1,55 +1,138 @@
-import sys
+import streamlit as st
+import sqlite3
+import pandas as pd
 import os
-from operator import attrgetter
 
-from cachetools import cachedmethod, TTLCache
-from cachetools.keys import hashkey
-from sqlalchemy import BigInteger
-from sqlmodel import create_engine, SQLModel, Session, select, Field
+class DatabaseClient:
+    """
+    A client for interacting with a SQLite database.
+    """
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from common.llm_client import LLMClient, Model, Provider
+    def __init__(self, db_url="marketing_platform.db", migrate=False, migration_scripts_path="migrations"):
+        """
+        Initializes the DatabaseClient with the specified database URL and migration options.
 
-_NUM_TOKENS_DEFAULT = 1_000_000
+        Args:
+            db_url (str): The URL or path to the SQLite database file.
+            migrate (bool): Whether to run database migrations.
+            migration_scripts_path (str): The path to the directory containing migration scripts.
+        """
+        self.db_url = db_url
+        self.migrate = migrate
+        self.migration_scripts_path = migration_scripts_path
+        self.conn = None
 
+        if self.migrate:
+            self.run_migrations()
 
-class Account(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    # User ID
-    user_id: str = Field(index=True, sa_type=BigInteger)  
-    username: str | None
-    provider: Provider = Field(default=Provider.GOOGLE)
-    model: Model = Field(default=Model.VERTEX_AI_GEMINI_API_KEY)
-    tokens_balance: int = Field(default=_NUM_TOKENS_DEFAULT)
-    # Whether the user is a friend of the bot owner.
-    # This is used to give the user an unlimited token balance.
-    is_friend: bool = Field(default=False)
+    def connect(self):
+        """
+        Connects to the SQLite database.
+        """
+        try:
+            self.conn = sqlite3.connect(self.db_url)
+        except sqlite3.Error as e:
+            st.error(f"Database connection error: {e}")
 
+    def disconnect(self):
+        """
+        Disconnects from the SQLite database.
+        """
+        if self.conn:
+            self.conn.close()
+            self.conn = None
 
-class DBClient:
-    def __init__(self, db_url: str, echo=True) -> None:
-        self.engine = create_engine(db_url, echo=echo)
-        self._cache = TTLCache(maxsize=1024, ttl=60 * 60 * 4)  # 4 hours
-        SQLModel.metadata.create_all(self.engine)
+    def execute_query(self, query, params=None):
+        """
+        Executes a SQL query and returns the results as a Pandas DataFrame.
 
-    def __del__(self) -> None:
-        self.engine.dispose()
+        Args:
+            query (str): The SQL query to execute.
+            params (tuple, optional): Parameters to pass to the query.
 
-    @cachedmethod(cache=attrgetter("_cache"))
-    def get_or_create_account(self, user_id: str, username=None) -> Account:
-        with Session(self.engine) as session:
-            statement = select(Account).filter(Account.user_id == user_id)
-            account = session.exec(statement).one_or_none()
-            if account is None:
-                account = Account(user_id=user_id, username=username)
-                session.add(account)
-                session.commit()
-                session.refresh(account)
-            return account
+        Returns:
+            pandas.DataFrame: The query results as a DataFrame, or None if an error occurs.
+        """
+        try:
+            if not self.conn:
+                self.connect()
 
-    def decrease_token_balance(self, account: Account, num_tokens: int) -> None:
-        with Session(self.engine) as session:
-            account.tokens_balance -= num_tokens
-            session.add(account)
-            session.commit()
-            session.refresh(account)
+            if params:
+                df = pd.read_sql_query(query, self.conn, params=params)
+            else:
+                df = pd.read_sql_query(query, self.conn)
+
+            return df
+        except sqlite3.Error as e:
+            st.error(f"Database query error: {e}")
+            return None
+        finally:
+            self.disconnect()
+
+    def execute_insert(self, query, params=None):
+        """
+        Executes an INSERT query.
+
+        Args:
+            query (str): The SQL INSERT query to execute.
+            params (tuple, optional): Parameters to pass to the query.
+        """
+        try:
+            if not self.conn:
+                self.connect()
+
+            cursor = self.conn.cursor()
+            if params:
+                cursor.execute(query, params)
+            else:
+                cursor.execute(query)
+            self.conn.commit()
+        except sqlite3.Error as e:
+            st.error(f"Database INSERT error: {e}")
+        finally:
+            self.disconnect()
+
+    def create_table(self, query):
+        """
+        Executes a table creation query.
+
+        Args:
+            query (str): The SQL create table query to execute.
+        """
+        try:
+            if not self.conn:
+                self.connect()
+
+            cursor = self.conn.cursor()
+            cursor.execute(query)
+            self.conn.commit()
+        except sqlite3.Error as e:
+            st.error(f"Database table creation error: {e}")
+        finally:
+            self.disconnect()
+
+    def run_migrations(self):
+        """
+        Runs database migrations from the specified directory.
+        """
+        if not os.path.exists(self.migration_scripts_path):
+            st.warning(f"Migration scripts directory not found: {self.migration_scripts_path}")
+            return
+
+        migration_files = sorted([f for f in os.listdir(self.migration_scripts_path) if f.endswith(".sql")])
+
+        for file in migration_files:
+            migration_path = os.path.join(self.migration_scripts_path, file)
+            try:
+                with open(migration_path, "r") as f:
+                    migration_sql = f.read()
+                if not self.conn:
+                    self.connect()
+                cursor = self.conn.cursor()
+                cursor.executescript(migration_sql)
+                self.conn.commit()
+                st.success(f"Migration {file} applied successfully.")
+            except sqlite3.Error as e:
+                st.error(f"Migration error in {file}: {e}")
+            finally:
+                self.disconnect()
