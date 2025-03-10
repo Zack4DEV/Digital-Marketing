@@ -29,10 +29,10 @@ jobs:
         python -c "from cryptography.fernet import Fernet; 
         fernet = Fernet(b'${{ secrets.MENDABLE_API_KEY }}'); 
         with open('.env.development.enc', 'rb') as file: 
-		        encrypted = file.read(); 
+            encrypted = file.read(); 
             decrypted = fernet.decrypt(encrypted); 
         with open('.env.development', 'wb') as decrypted_file: 
-        	  decrypted_file.write(decrypted)
+            decrypted_file.write(decrypted)
         "
 
     - name: Use decrypted .env file

@@ -5,7 +5,7 @@
   channel = "stable-24.05"; # or "unstable"
 
   # Use https://search.nixos.org/packages to find packages
-  home.packages = with pkgs; [
+    packages = [
     pkgs.sudo
     pkgs.python3
     pkgs.python311Packages.pip
