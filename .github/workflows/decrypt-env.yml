@@ -26,8 +26,11 @@ jobs:
       env:
         MENDABLE_API_KEY: ${{ secrets.MENDABLE_API_KEY }}
       run: |
-        python -c "from cryptography.fernet import Fernet; 
-        fernet = Fernet(b'${{ secrets.MENDABLE_API_KEY }}'); 
+        python -c "
+        import base64;
+        from cryptography.fernet import Fernet; 
+        fernet = Fernet(b64encode('${{ secrets.MENDABLE_API_KEY }}').encode('ascii')).decode('ascii'));
+        fernet  = fernet.replace('/', '_').replace('+', '-').rstrip('=');
         with open('.env.development.enc', 'rb') as file: 
             encrypted = file.read(); 
             decrypted = fernet.decrypt(encrypted); 
