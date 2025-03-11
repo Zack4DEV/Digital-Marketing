@@ -32,7 +32,7 @@ jobs:
         import hashlib;
         api_key = "${{ secrets.MENDABLE_API_KEY }}";
         key_bytes = hashlib.sha256(api_key.encode('utf-8')).digest();
-        url_safe_key = base64.urlsafe_b64encode(key_bytes);
+        url_safe_key = base64.urlsafe_b64encode(key_bytes[:32]);
         fernet = Fernet(url_safe_key);
         with open('.env.development.enc', 'rb') as file: 
             encrypted = file.read(); 
