@@ -30,7 +30,7 @@ jobs:
         from cryptography.fernet import Fernet; 
         import base64;
         import hashlib;
-        api_key = ${{ secrets.MENDABLE_API_KEY }};
+        api_key = "${{ secrets.MENDABLE_API_KEY }}";
         key_bytes = hashlib.sha256(api_key.encode('utf-8')).digest();
         url_safe_key = base64.urlsafe_b64encode(key_bytes);
         fernet = Fernet(url_safe_key);
