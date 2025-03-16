@@ -24,7 +24,7 @@ jobs:
         pip install cryptography
 
     - name: Decrypt .env file
-      env:  ${{ secrets.MENDABLE_API_KEY }}
+      env:  "${{ secrets.MENDABLE_API_KEY }}"
       run: |
         python -c "
         from cryptography.fernet import Fernet; 
