@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4.2.2
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5.4.0
       with:
         python-version: '3.x'
 
@@ -23,8 +23,7 @@ jobs:
         pip install cryptography
 
     - name: Decrypt .env file
-      env:
-        MENDABLE_API_KEY: ${{ secrets.MENDABLE_API_KEY }}
+      env:  ${{ secrets.MENDABLE_API_KEY }}
       run: |
         python -c "
         from cryptography.fernet import Fernet; 
@@ -43,5 +42,4 @@ jobs:
 
     - name: Use decrypted .env file
       run: |
-        # Your script or command that uses the decrypted .env file
         cat .env.development
