@@ -2,7 +2,7 @@ import time
 
 import streamlit as st
 
-from common.llm_client import LLMClient
+from utils.llm_client import LLMClient
 
 # Get a session state
 st.session_state.setdefault("time", 0)

@@ -1,6 +1,6 @@
 import streamlit as st
 import hashlib
-from common.db_client import DatabaseClient
+from utils.db_client import DatabaseClient
 
 # Initialize the database client
 db_client = DatabaseClient(migrate=True)  # Ensure migrations run

@@ -6,8 +6,10 @@ WORKDIR /app
 
 # Copy the directory containing the application into the container at /app
 COPY assets/ /app/assets/
-COPY common/ /app/common/
+COPY migrations/ /app/migrations/
 COPY pages/ /app/pages/
+COPY utils/ /app/utils/
+
 COPY *.py /app/
 COPY requirements.txt /app/
 
@@ -19,11 +21,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # EXPOSE 80
 
 # Define environment variables
-ENV DB_URI="sqlite:////app/data/digital-marketing.db"
+ENV DB_URI=
 ENV MENDABLE_API_KEY=${MENDABLE_API_KEY}
-ENV RESPELL_API_KEY=${RESPELL_API_KEY}
-ENV OPENAI_API_KEY=${OPENAI_API_KEY}
-ENV GEMINI_API_KEY=${GEMINI_API_KEY}
 
 # Make sure the directory for SQLite database exists
 RUN mkdir /app/data
