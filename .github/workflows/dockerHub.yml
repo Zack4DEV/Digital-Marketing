@@ -25,7 +25,7 @@ jobs:
           - name: "Digital Marketing ,Docker Hub Build and Push"
             uses: mr-smithers-excellent/docker-build-push@v6.4
             with:
-              dockerfile: ./Dockerfile
+              dockerfile: ./Docker/3.13-slim/Dockerfile
               registry: remote
               username: ${{ secrets.HUB_DOCKER_USERNAME }}
               password: ${{ secrets.HUB_DOCKER_PASSWORD }}

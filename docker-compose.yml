@@ -1,0 +1,27 @@
+# docker-compose.yml
+version: "3.8"
+
+services:
+  streamlit-app:
+    build:
+      context: .
+      dockerfile: Docker/3.13-slim/Dockerfile
+    ports:
+      - "8501:8501" # Streamlit's default port
+    volumes:
+      - ./assets:/app/assets # Mount the data volume
+      - ./migrations:/app/migrations
+      - ./pages:/app/pages
+      - ./utils:/app/utils
+    environment:
+      DB_URI:  # Or your database connection string
+      MENDABLE_API_KEY: ${MENDABLE_API_KEY} # Make sure to set this in your environment or .env file
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: always # Optional: Restart the container if it crashes
+    # If you have an .env file for development, you can use:
+    # env_file:
+    #   - .env.development
