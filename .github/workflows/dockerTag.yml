@@ -46,7 +46,7 @@ jobs:
             with:
               context: .
               push: true
-              dockerfile: ./Docker/3.13-slim/Dockerfile
+              dockerfile: Docker/3.13-slim/Dockerfile
               tags: ${{ steps.meta.outputs.tags }}
               labels: ${{ steps.meta.outputs.labels }}
               registry: remote
