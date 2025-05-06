@@ -5,9 +5,9 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 COPY . ./app
 
-RUN ./opt/venv/bin/pip3 install --no-cache-dir -r ./app/requirements.txt
-
 WORKDIR ./app
+
+ENV VIRTUAL_ENV pip3 install --no-cache-dir -r requirements.txt
 
 EXPOSE 8501
 
