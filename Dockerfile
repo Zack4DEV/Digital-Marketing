@@ -20,8 +20,6 @@ WORKDIR /app
 COPY package.json yarn.lock* ./
 RUN yarn install || npm install
 
-COPY . .
-
 EXPOSE 8081
 
 CMD ["npx", "expo", "start", "--tunnel"]
