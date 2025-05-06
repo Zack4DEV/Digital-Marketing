@@ -3,9 +3,8 @@ FROM python:3.11-slim
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-RUN pip install --no-cache-dir -r "./requirements.txt"
+RUN $PATH/pip3 install --no-cache-dir -r "requirements.txt"
 
-ENV PATH="/opt/venv/bin:$PATH"
 COPY . ./app
 
 WORKDIR /app/
