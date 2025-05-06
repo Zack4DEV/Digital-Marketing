@@ -9,6 +9,7 @@
   # Use https://search.nixos.org/packages to find packages
   packages = [
       pkgs.nodejs_23
+      pkgs.yarn
       pkgs.typescript
      # pkgs.vscode-extensions.ms-azuretools.vscode-docker
       pkgs.docker_27
