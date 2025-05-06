@@ -29,4 +29,3 @@ jobs:
         uses: actions/deploy-pages@v4.0.5
         with:
             preview: true
-            token: ${{ secrets.GITHUB_TOKEN }}
