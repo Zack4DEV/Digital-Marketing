@@ -1,5 +1,5 @@
-streamlit>=1.37.0
-openai
-requests
-mendable-sdk
-pandas
+streamlit >= 1.25.0 
+openai >= 1.77.0
+requests >= 2.32.3
+mendable-py >= 0.0.6
+pandas >= 2.2.3
