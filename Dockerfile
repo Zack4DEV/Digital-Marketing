@@ -1,10 +1,6 @@
 FROM python:3.11-slim
 
-COPY requirements.txt /app
-
-COPY streamlit_app.py components screens utils /app
-
-COPY pyproject.toml /app
+COPY ./* /app
 
 WORKDIR /app
 
