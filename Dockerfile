@@ -5,7 +5,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 COPY . ./app
 
-RUN /opt/venv/bin/pip3 install --no-cache-dir -r ./app/requirements.txt
+RUN ./opt/venv/bin/pip3 install --no-cache-dir -r ./app/requirements.txt
 
 WORKDIR ./app
 
