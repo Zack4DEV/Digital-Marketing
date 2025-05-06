@@ -1,17 +1,15 @@
 FROM python:3.11-slim
 
-WORKDIR /app
-
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-COPY ./requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r ./app/requirements.txt
-
-WORKDIR /app/
+COPY ./requirements.txt ./app/requirements.txt
+RUN pip install --no-cache-dir -r "./app/requirements.txt"
 
 ENV PATH="/opt/venv/bin:$PATH"
 COPY . ./app
+
+WORKDIR /app/
 
 EXPOSE 8501
 
