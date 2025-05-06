@@ -1,4 +1,4 @@
-name: Docker Hub ,Deployment
+name: Docker Tag
 
 on:
   push:
