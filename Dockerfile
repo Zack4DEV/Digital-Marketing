@@ -13,11 +13,13 @@ RUN apt-get update && apt-get install -y \
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ENV ANDROID_SDK_ROOT=/opt/android-sdk
 
+COPY package.json yarn.lock* ./
 RUN npm install -g expo-cli
+
+COPY . /app
 
 WORKDIR /app
 
-COPY package.json yarn.lock* ./
 RUN yarn install || npm install
 
 EXPOSE 8081
