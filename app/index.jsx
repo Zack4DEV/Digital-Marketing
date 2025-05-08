@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, NavigationIndependentTree } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
@@ -13,56 +13,59 @@ const Stack = createStackNavigator();
 
 const Navigation = () => {
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName="Dashboard"
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: '#5196f4',
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      >
-        <Stack.Screen
-          name="Dashboard"
-          component={Dashboard}
-          options={({ navigation }) => ({
-            title: 'Influencer Dashboard',
-            headerRight: () => (
-              <View style={styles.headerButtons}>
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('CampaignManagement')}
-                  style={styles.headerButton}
-                >
-                  <Text style={styles.headerButtonText}>Campaigns</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('Analytics')}
-                  style={styles.headerButton}
-                >
-                  <Text style={styles.headerButtonText}>Analytics</Text>
-                </TouchableOpacity>
-              </View>
-            ),
-          })}
-        />
-        <Stack.Screen
-          name="CampaignManagement"
-          component={CampaignManagement}
-          options={{ title: 'Campaign Management' }}
-        />
-        <Stack.Screen
-          name="Analytics"
-          component={Analytics}
-          options={{ title: 'Analytics' }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <NavigationIndependentTree>
+      <NavigationContainer>
+        <Stack.Navigator
+          initialRouteName="Dashboard"
+          screenOptions={{
+            headerStyle: {
+              backgroundColor: '#5196f4',
+            },
+            headerTintColor: '#fff',
+            headerTitleStyle: {
+              fontWeight: 'bold',
+            },
+          }}
+        >
+          <Stack.Screen
+            name="Dashboard"
+            component={Dashboard}
+            options={({ navigation }) => ({
+              title: 'Influencer Dashboard',
+              headerRight: () => (
+                <View style={styles.headerButtons}>
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate('CampaignManagement')}
+                    style={styles.headerButton}
+                  >
+                    <Text style={styles.headerButtonText}>Campaigns</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate('Analytics')}
+                    style={styles.headerButton}
+                  >
+                    <Text style={styles.headerButtonText}>Analytics</Text>
+                  </TouchableOpacity>
+                </View>
+              ),
+            })}
+          />
+          <Stack.Screen
+            name="CampaignManagement"
+            component={CampaignManagement}
+            options={{ title: 'Campaign Management' }}
+          />
+          <Stack.Screen
+            name="Analytics"
+            component={Analytics}
+            options={{ title: 'Analytics' }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </NavigationIndependentTree>
   );
 };
+
 
 const App = () => {
   return (
